@@ -1,14 +1,13 @@
 from collections import defaultdict
-import cPickle as pickle
 import logging
 import operator
 import os
 
 import numpy as np
 
-from actionmanager import ActionManager
-from searchengine import SearchEngine
-from statemachine import StateMachine
+from .actionmanager import ActionManager
+from .searchengine import SearchEngine
+from .statemachine import StateMachine
 
 class DialogueManager(object):
   def __init__(self, data_dir, feature_type, survey):
@@ -127,7 +126,7 @@ class DialogueManager(object):
     return posmodel, negmodel
 
   def evalAP(self,ret,ans):
-    tp = [ float(ans.has_key(docID)) for docID,val in ret ]
+    tp = [ float(docID in ans) for docID,val in ret ]
     atp = np.cumsum(tp)
     precision = [  atp[idx] / (idx+1) * tp[idx] for idx,(docID,val) in enumerate(ret)  ]
     return ( sum(precision)/len(ans) if len(ans) else 0. )

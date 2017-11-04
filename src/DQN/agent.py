@@ -6,13 +6,13 @@ Author: Nathan Sprague
 
 """
 import os
-import cPickle
+import _pickle as cPickle
 import time
 import logging
 
 import numpy as np
 
-import ale_data_set
+from .ale_data_set import DataSet
 
 import sys
 sys.setrecursionlimit(10000)
@@ -50,14 +50,14 @@ class NeuralAgent(object):
 
         self.num_actions = self.network.num_actions
 
-        self.data_set = ale_data_set.DataSet(width=self.image_width,
+        self.data_set = DataSet(width=self.image_width,
                                              height=self.image_height,
                                              rng=rng,
                                              max_steps=self.replay_memory_size,
                                              phi_length=self.phi_length)
 
         # just needs to be big enough to create phi's
-        self.test_data_set = ale_data_set.DataSet(width=self.image_width,
+        self.test_data_set = DataSet(width=self.image_width,
                                                   height=self.image_height,
                                                   rng=rng,
                                                   max_steps=self.phi_length * 2,
@@ -223,7 +223,7 @@ class NeuralAgent(object):
 #            logging.debug( self.network.q_vals(phi) )
 #            print( 'q_val : '+ str(self.network.q_vals(phi)) +'\taction : '+str(action) )
         else:
-            print 'random action'
+            print('random action')
             action = self.rng.randint(0, self.num_actions)
 
         return action
@@ -282,7 +282,7 @@ class NeuralAgent(object):
 
     def finish_epoch(self, epoch):
         net_file = open(self.exp_dir + '/network_file_' + str(epoch) + \
-                        '.pkl', 'w')
+                        '.pkl', 'wb')
         cPickle.dump(self.network, net_file, -1)
         net_file.close()
 

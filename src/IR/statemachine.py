@@ -6,10 +6,10 @@ import os
 import numpy as np
 import random
 
-from expansion import expansion
-from retmath import *
-from retrieval import retrieveCombination
-import reader
+from .expansion import expansion
+from .retmath import *
+from .retrieval import retrieveCombination
+from .reader import *
 
 class StateMachine(object):
   def __init__(self,background,inv_index,doclengs,data_dir,\
@@ -64,8 +64,8 @@ class StateMachine(object):
         docs = []
         doclengs = []
         for docID,score in ret[:50]:
-            docmodel_path = os.path.join(self.docmodel_dir,reader.IndexToDocName(docID))
-            model = reader.readDocModel(docmodel_path)
+            docmodel_path = os.path.join(self.docmodel_dir,IndexToDocName(docID))
+            model = readDocModel(docmodel_path)
 
             docs.append(model)
             doclengs.append(self.doclengs[docID])
@@ -98,8 +98,8 @@ class StateMachine(object):
       if k>=20:
         break
       #model = self.docmodels[IndexToDocName(docID)]
-      docmodel_path = os.path.join(self.docmodel_dir, reader.IndexToDocName(docID))
-      model = reader.readDocModel(docmodel_path)
+      docmodel_path = os.path.join(self.docmodel_dir, IndexToDocName(docID))
+      model = readDocModel(docmodel_path)
 
       docs.append(model)
       doclengs.append(self.doclengs[docID])

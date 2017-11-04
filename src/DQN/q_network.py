@@ -17,7 +17,7 @@ import lasagne
 import numpy as np
 import theano
 import theano.tensor as T
-from updates import deepmind_rmsprop
+from .updates import deepmind_rmsprop
 
 
 class DeepQLearner:
@@ -30,7 +30,7 @@ class DeepQLearner:
                  rms_epsilon, momentum, nesterov_momentum, clip_delta, freeze_interval,
                  batch_size, network_type, update_rule,
                  batch_accumulator, rng, input_scale=255.0):
-        assert not ( momentum and nesterov_momentum ), "Choose only 1 momentum method!"
+        assert not (momentum and nesterov_momentum), "Choose only 1 momentum method!"
 
         self.input_width = input_width
         self.input_height = input_height
@@ -141,11 +141,11 @@ class DeepQLearner:
             updates = lasagne.updates.rmsprop(loss, params, self.lr, self.rho,
                                               self.rms_epsilon)
         elif update_rule == 'adagrad':
-	    updates = lasagne.updates.adagrad(loss, params, self.lr,
-							self.rms_epsilon)
+            updates = lasagne.updates.adagrad(loss, params, self.lr,
+                                              self.rms_epsilon)
         elif update_rule == 'adadelta':
-	    updates = lasagne.updates.adadelta(loss, params, self.lr, self.rho,
-        				self.rms_epsilon)
+            updates = lasagne.updates.adadelta(loss, params, self.lr, self.rho,
+                                               self.rms_epsilon)
         elif update_rule == 'sgd':
             updates = lasagne.updates.sgd(loss, params, self.lr)
         else:
@@ -154,9 +154,9 @@ class DeepQLearner:
         if self.momentum > 0:
             updates = lasagne.updates.apply_momentum(updates, None,
                                                      self.momentum)
-	elif self.nesterov_momentum > 0:
-            updates = lasagne.updates.apply_nesterov_momentum(updates,None,
-						     self.nesterov_momentum)
+        elif self.nesterov_momentum > 0:
+            updates = lasagne.updates.apply_nesterov_momentum(updates, None,
+                                                              self.nesterov_momentum)
 
         self._train = theano.function([], [loss, q_vals], updates=updates,
                                       givens=givens)
@@ -181,15 +181,13 @@ class DeepQLearner:
                                                batch_size)
         elif network_type == "rl_dnn":
             return self.build_rl_network_dnn(input_width, input_height,
-                                                output_dim, num_frames,
-                                                batch_size)
+                                             output_dim, num_frames,
+                                             batch_size)
         elif network_type == "linear":
             return self.build_linear_network(input_width, input_height,
                                              output_dim, num_frames, batch_size)
         else:
             raise ValueError("Unrecognized network: {}".format(network_type))
-
-
 
     def train(self, states, actions, rewards, next_states, terminals):
         """
@@ -213,7 +211,7 @@ class DeepQLearner:
         self.rewards_shared.set_value(rewards)
         self.terminals_shared.set_value(terminals)
         if (self.freeze_interval > 0 and
-            self.update_counter % self.freeze_interval == 0):
+                self.update_counter % self.freeze_interval == 0):
             self.reset_q_hat()
         loss, _ = self._train()
         self.update_counter += 1
@@ -253,7 +251,7 @@ class DeepQLearner:
             filter_size=(8, 8),
             stride=(4, 4),
             nonlinearity=lasagne.nonlinearities.rectify,
-            W=lasagne.init.HeUniform(), # Defaults to Glorot
+            W=lasagne.init.HeUniform(),  # Defaults to Glorot
             b=lasagne.init.Constant(.1),
             dimshuffle=True
         )
@@ -373,7 +371,7 @@ class DeepQLearner:
             filter_size=(8, 8),
             stride=(4, 4),
             nonlinearity=lasagne.nonlinearities.rectify,
-            #W=lasagne.init.HeUniform(c01b=True),
+            # W=lasagne.init.HeUniform(c01b=True),
             W=lasagne.init.Normal(.01),
             b=lasagne.init.Constant(.1),
             dimshuffle=True
@@ -385,7 +383,7 @@ class DeepQLearner:
             filter_size=(4, 4),
             stride=(2, 2),
             nonlinearity=lasagne.nonlinearities.rectify,
-            #W=lasagne.init.HeUniform(c01b=True),
+            # W=lasagne.init.HeUniform(c01b=True),
             W=lasagne.init.Normal(.01),
             b=lasagne.init.Constant(.1),
             dimshuffle=True
@@ -395,7 +393,7 @@ class DeepQLearner:
             l_conv2,
             num_units=256,
             nonlinearity=lasagne.nonlinearities.rectify,
-            #W=lasagne.init.HeUniform(),
+            # W=lasagne.init.HeUniform(),
             W=lasagne.init.Normal(.01),
             b=lasagne.init.Constant(.1)
         )
@@ -404,7 +402,7 @@ class DeepQLearner:
             l_hidden1,
             num_units=output_dim,
             nonlinearity=None,
-            #W=lasagne.init.HeUniform(),
+            # W=lasagne.init.HeUniform(),
             W=lasagne.init.Normal(.01),
             b=lasagne.init.Constant(.1)
         )
@@ -423,14 +421,13 @@ class DeepQLearner:
             shape=(batch_size, num_frames, input_width, input_height)
         )
 
-
         l_conv1 = dnn.Conv2DDNNLayer(
             l_in,
             num_filters=16,
             filter_size=(8, 8),
             stride=(4, 4),
             nonlinearity=lasagne.nonlinearities.rectify,
-            #W=lasagne.init.HeUniform(),
+            # W=lasagne.init.HeUniform(),
             W=lasagne.init.Normal(.01),
             b=lasagne.init.Constant(.1)
         )
@@ -441,7 +438,7 @@ class DeepQLearner:
             filter_size=(4, 4),
             stride=(2, 2),
             nonlinearity=lasagne.nonlinearities.rectify,
-            #W=lasagne.init.HeUniform(),
+            # W=lasagne.init.HeUniform(),
             W=lasagne.init.Normal(.01),
             b=lasagne.init.Constant(.1)
         )
@@ -450,7 +447,7 @@ class DeepQLearner:
             l_conv2,
             num_units=256,
             nonlinearity=lasagne.nonlinearities.rectify,
-            #W=lasagne.init.HeUniform(),
+            # W=lasagne.init.HeUniform(),
             W=lasagne.init.Normal(.01),
             b=lasagne.init.Constant(.1)
         )
@@ -459,20 +456,18 @@ class DeepQLearner:
             l_hidden1,
             num_units=output_dim,
             nonlinearity=None,
-            #W=lasagne.init.HeUniform(),
+            # W=lasagne.init.HeUniform(),
             W=lasagne.init.Normal(.01),
             b=lasagne.init.Constant(.1)
         )
 
         return l_out
 
-
     def build_rl_network_dnn(self, input_width, input_height, output_dim,
-                            num_frames, batch_size):
+                             num_frames, batch_size):
 
         var = 0.01
         bias = 0.1
-
 
         layer = lasagne.layers.InputLayer(
             shape=(batch_size, num_frames, input_width, input_height)
@@ -493,14 +488,14 @@ class DeepQLearner:
 #            W=lasagne.init.Normal(var),
 #            b=lasagne.init.Constant(bias)
 #        )
-        for _ in xrange(self.network_height):
+        for _ in range(self.network_height):
             layer = lasagne.layers.DenseLayer(
-            layer,
-            num_units=self.network_width,
-            nonlinearity=lasagne.nonlinearities.rectify,
-            W=lasagne.init.Normal(var),
-            b=lasagne.init.Constant(bias)
-        )
+                layer,
+                num_units=self.network_width,
+                nonlinearity=lasagne.nonlinearities.rectify,
+                W=lasagne.init.Normal(var),
+                b=lasagne.init.Constant(bias)
+            )
 
         l_out = lasagne.layers.DenseLayer(
             layer,
@@ -527,27 +522,28 @@ class DeepQLearner:
             l_in,
             num_units=output_dim,
             nonlinearity=None,
-#            W=lasagne.init.Constant(0.0),
-            W = lasagne.init.Normal(0.01,0),
+            #            W=lasagne.init.Constant(0.0),
+            W=lasagne.init.Normal(0.01, 0),
             b=None
         )
 
         return l_out
 
+
 def main():
-    input_width, input_height = [100,100]
+    input_width, input_height = [100, 100]
     num_actions = 10
-    phi_length = 4 # phi length?  input 4 frames at once
+    phi_length = 4  # phi length?  input 4 frames at once
     discount = 0.95
     learning_rate = 0.00025
-    rms_decay = 0.99 # rms decay
+    rms_decay = 0.99  # rms decay
     rms_epsilon = 0.1
     momentum = 0
     clip_delta = 1.0
-    freeze_interval = 10000 #???  no freeze?
+    freeze_interval = 10000  # ???  no freeze?
     batch_size = 32
     network_type = 'rl_dnn'
-    update_rule = 'deepmind_rmsprop' # need update
+    update_rule = 'deepmind_rmsprop'  # need update
     batch_accumulator = 'sum'
     rng = np.random.RandomState()
     ###### AGENT ######
@@ -557,26 +553,26 @@ def main():
     replay_memory_size = 1000000
     experiment_prefix = 'result/LF2'
     replay_start_size = 50000
-    update_frequency = 4  #??
+    update_frequency = 4  # ??
     ######
     num_epoch = 200
     step_per_epoch = 250000
     step_per_test = 125000
 
     network = DeepQLearner(input_width, input_height, num_actions,
-                                           phi_length,
-                                           discount,
-                                           learning_rate,
-                                           rms_decay,
-                                           rms_epsilon,
-                                           momentum,
-                                           clip_delta,
-                                           freeze_interval,
-                                           batch_size,
-                                           network_type,
-                                           update_rule,
-                                           batch_accumulator,
-                                           rng)
+                           phi_length,
+                           discount,
+                           learning_rate,
+                           rms_decay,
+                           rms_epsilon,
+                           momentum,
+                           clip_delta,
+                           freeze_interval,
+                           batch_size,
+                           network_type,
+                           update_rule,
+                           batch_accumulator,
+                           rng)
 
 
 if __name__ == '__main__':
