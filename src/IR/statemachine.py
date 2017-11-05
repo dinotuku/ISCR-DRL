@@ -122,12 +122,12 @@ class StateMachine(object):
       if i < 10:
         WIG10 += (ret[i][1]-irrel)/10.0
         NQC10 += math.pow(ret[i][1]-irrel,2)/10.0
-        for wordID,prob in doc.iteritems():
+        for wordID,prob in doc.items():
           ieDocT10[ wordID ] += prob * leng
       else:
         WIG20 += (ret[i][1]-irrel)/10.0
         NQC20 += math.pow(ret[i][1]-irrel,2)/10.0
-        for wordID,prob in doc.iteritems():
+        for wordID,prob in doc.items():
           ieDocT20[ wordID ] += prob * leng
 
     ieDocT10 = renormalize(ieDocT10)
@@ -167,8 +167,8 @@ class StateMachine(object):
 
     N = min([ret,oret])
     for i in range(len(Ns)):
-      if N<Ns[i]:
-        Ns[i]=N
+      if len(N)<Ns[i]:
+        Ns[i]=len(N)
 
     qf10 = 0.0
     qf20 = 0.0

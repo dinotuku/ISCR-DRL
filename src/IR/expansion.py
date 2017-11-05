@@ -22,7 +22,7 @@ def expansion(prior, docnames, doclengs, back, iteration=10, mu=10, delta=1):
     # init query model
     query = defaultdict(float)
     for model in models:
-        for word, val in model.iteritems():
+        for word, val in model.items():
             query[word] += val / N
 
     # EM expansion
@@ -33,7 +33,7 @@ def expansion(prior, docnames, doclengs, back, iteration=10, mu=10, delta=1):
             model = models[m]
             alpha = alphas[m]
             aux[m] = defaultdict(float)
-            for word, val in model.iteritems():
+            for word, val in model.items():
                 aux[m][word] = alpha * query[word] / \
                     (alpha * query[word] + (1 - alpha) * back[word])
 
@@ -43,29 +43,29 @@ def expansion(prior, docnames, doclengs, back, iteration=10, mu=10, delta=1):
         for m in range(len(models)):
             alphas[m] = 0.
             model = models[m]
-            for word, val in model.iteritems():
+            for word, val in model.items():
                 alphas[m] += aux[m][word] * val * doclengs[m]
                 tmpmass[word] += aux[m][word] * val * doclengs[m]
             alphas[m] /= doclengs[m]
 
         # Estimate expanded query model
         qexpand = defaultdict(float)
-        for word, val in prior.iteritems():
+        for word, val in prior.items():
             qexpand[word] = mu * val
-        for word, val in tmpmass.iteritems():
+        for word, val in tmpmass.items():
             qexpand[word] += tmpmass[word]
 
         # Normalize expanded model
         Z = 0.0
-        for word, val in qexpand.iteritems():
+        for word, val in qexpand.items():
             Z += val
-        for word in qexpand.iterkeys():
+        for word in qexpand.keys():
             qexpand[word] = qexpand[word] / Z
 
         query = qexpand
         mu *= delta
 
-    qsort = sorted(query.iteritems(), key=operator.itemgetter(1), reverse=True)
+    qsort = sorted(query.items(), key=operator.itemgetter(1), reverse=True)
     query = dict(qsort[0:100])
 
     return query

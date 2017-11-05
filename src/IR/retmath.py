@@ -11,7 +11,7 @@ def renormalize(distdict):
     if Z == 1:
         return distdict
     nol = {}
-    for key in distdict.iterkeys():
+    for key in distdict.keys():
         nol[key] = distdict[key] / Z
     return nol
 
@@ -23,22 +23,22 @@ def gaussian(mean, var, x):
 
 def entropy(model):
     ent = 0.0
-    for key, p in model.iteritems():
+    for key, p in model.items():
         ent += -1 * p * math.log(p)
     return ent
 
 
 def cross_entropies(model1, model2):
     cent = 0.0
-    for key1, p1 in model1.iteritems():
-        if model2.has_key(key1):
+    for key1, p1 in model1.items():
+        if key1 in model2:
             p2 = model2[key1]
             cent += cross_entropy(p1, p2)
     return cent
 
 
 def IDFscore(model, inv_index):
-    x = sorted(model.iteritems(), key=operator.itemgetter(1), reverse=True)
+    x = sorted(model.items(), key=operator.itemgetter(1), reverse=True)
     if len(x) > 20:
         x = x[:20]
     scores = []
@@ -59,7 +59,7 @@ def QueryScope(model, inv_index):
     if len(model) < 10:
         N = len(model)
     docs = []
-    for wordID, prob in sorted(model.iteritems(),
+    for wordID, prob in sorted(model.items(),
                                key=operator.itemgetter(1), reverse=True)[:N]:
         docs = list(set(docs) | set(inv_index[wordID].values()))
     return -1 * math.log(float(len(docs) + 1.0) / 5047.0)
@@ -70,7 +70,7 @@ def idfDev(model, inv_index):
     if len(model) < 10:
         N = len(model)
     idfs = []
-    for wordID, prob in sorted(model.iteritems(),
+    for wordID, prob in sorted(model.items(),
                                key=operator.itemgetter(1), reverse=True)[:N]:
         N = float(len(inv_index[wordID]))
         idf = math.log(5047.0 + 0.5) / (N + 1) / math.log(5047.0 + 1)
@@ -113,7 +113,7 @@ def FitExpDistribution(ret, lamda):
     mean = sum(expdist) / float(len(expdist))
     expdist = [x / mean for x in expdist]
 
-    rank = map(operator.itemgetter(1), ret)[:100]
+    rank = list(map(operator.itemgetter(1), ret))[:100]
     meanX = sum(rank) / float(len(rank)) + rank[-1]
     if meanX == 0:
         return 0.
@@ -130,7 +130,7 @@ def FitGaussDistribution(ret, m, v):
     mean = sum(gaussdist) / float(len(gaussdist))
     gaussdist = [x / mean for x in gaussdist]
 
-    rank = map(operator.itemgetter(1), ret)[:100]
+    rank = list(map(operator.itemgetter(1), ret))[:100]
     meanX = sum(rank) / float(len(rank)) + rank[-1]
     if meanX == 0:
         return 0.

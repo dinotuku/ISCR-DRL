@@ -22,9 +22,9 @@ def retrieve(query, background, inv_index, docleng, alpha):
     for i in xrange(1,5048):
         result[i] = -9999
 
-    for wordID, weight in query.iteritems():
+    for wordID, weight in query.items():
         existDoc = {}
-	for docID, val in inv_index[wordID].iteritems():
+	for docID, val in inv_index[wordID].items():
 	    existDoc[docID] = 1
 	    # smooth doc model by background
 	    alpha_d = docleng[docID]/(docleng[docID]+alpha)
@@ -37,9 +37,9 @@ def retrieve(query, background, inv_index, docleng, alpha):
 	    else:
 		result[docID] = cross_entropy(qryprob,docprob)
 	
-	for docID, val in result.iteritems():
-	    if not existDoc.has_key(docID) and\
-		    background.has_key(wordID):
+	for docID, val in result.items():
+	    if not docID in existDoc and\
+		    wordID in background:
 		alpha_d = docleng[docID]/(docleng[docID]+alpha)
 		qryprob = weight
 	        docprob = (1-alpha_d)*background[wordID]
@@ -48,7 +48,7 @@ def retrieve(query, background, inv_index, docleng, alpha):
 		else:
 		    result[docID] = cross_entropy(qryprob,docprob)
 
-    sorted_ret = sorted(result.iteritems(),\
+    sorted_ret = sorted(result.items(),\
 	    key=operator.itemgetter(1),reverse=True)	
     return sorted_ret
 '''
@@ -58,9 +58,9 @@ def retrieveCombination(query, negquery, background, inv_index, docleng, alpha, 
     result = {}
     for i in range(1, 5048, 1):
         result[i] = -9999
-    for wordID, weight in query.iteritems():
+    for wordID, weight in query.items():
         existDoc = {}
-        for docID, val in inv_index[wordID].iteritems():
+        for docID, val in inv_index[wordID].items():
             existDoc[docID] = 1
             # smooth doc model by background
             alpha_d = docleng[docID] / (docleng[docID] + alpha)
@@ -73,9 +73,9 @@ def retrieveCombination(query, negquery, background, inv_index, docleng, alpha, 
             else:
                 result[docID] = cross_entropy(qryprob, docprob)
 
-        for docID, val in result.iteritems():
-            if not existDoc.has_key(docID) and\
-                    background.has_key(wordID):
+        for docID, val in result.items():
+            if not docID in existDoc and\
+                    wordID in background:
                 alpha_d = docleng[docID] / (docleng[docID] + alpha)
                 qryprob = weight
                 docprob = (1 - alpha_d) * background[wordID]
@@ -84,9 +84,9 @@ def retrieveCombination(query, negquery, background, inv_index, docleng, alpha, 
                 else:
                     result[docID] = cross_entropy(qryprob, docprob)
 
-    for wordID, weight in negquery.iteritems():
+    for wordID, weight in negquery.items():
         existDoc = {}
-        for docID, val in inv_index[wordID].iteritems():
+        for docID, val in inv_index[wordID].items():
             existDoc[docID] = 1
             # smooth doc model by background
             alpha_d = docleng[docID] / (docleng[docID] + alpha)
@@ -97,9 +97,9 @@ def retrieveCombination(query, negquery, background, inv_index, docleng, alpha, 
             else:
                 result[docID] = -1 * beta * cross_entropy(qryprob, docprob)
 
-        for docID, val in result.iteritems():
-            if not existDoc.has_key(docID) and\
-                    background.has_key(wordID):
+        for docID, val in result.items():
+            if not docID in existDoc and\
+                    wordID in background:
                 alpha_d = docleng[docID] / (docleng[docID] + alpha)
                 qryprob = weight
                 docprob = (1 - alpha_d) * background[wordID]
@@ -108,7 +108,7 @@ def retrieveCombination(query, negquery, background, inv_index, docleng, alpha, 
                 else:
                     result[docID] = -1 * beta * cross_entropy(qryprob, docprob)
 
-    sorted_ret = sorted(result.iteritems(),
+    sorted_ret = sorted(result.items(),
                         key=operator.itemgetter(1), reverse=True)
     return sorted_ret
 
@@ -120,7 +120,7 @@ def evalAP(ret,ans):
     get = 0.0
     for docID, val in ret:
         cnt += 1.0
-        if ans.has_key(docID):
+        if docID in ans:
             get += 1.0
             AP += float(get)/float(cnt)
     if len(ans)!=0:
