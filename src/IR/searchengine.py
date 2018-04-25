@@ -32,8 +32,8 @@ class SearchEngine(object):
             for docID, val in self.inv_index[wordID].iteritems():
                 existDoc[docID] = 1
                 # smooth doc model by background
-                # alpha_d = docleng[docID] / (docleng[docID] + self.alpha)
-                # docprob = (1 - alpha_d) * background[wordID] + alpha_d * val
+                # alpha_d = self.doclengs[docID] / (self.doclengs[docID] + self.alpha)
+                # docprob = (1 - alpha_d) * self.background[wordID] + alpha_d * val
                 docprob = val
                 qryprob = weight
 
@@ -46,9 +46,9 @@ class SearchEngine(object):
             # Run background model
             for docID, val in result.iteritems():
                 if not existDoc.has_key(docID) and self.background.has_key(wordID):
-                    # alpha_d = docleng[docID] / (docleng[docID] + self.alpha)
-                    # docprob = (1 - alpha_d) * background[wordID]
-                    docprob = val
+                    # alpha_d = self.doclengs[docID] / (self.doclengs[docID] + self.alpha)
+                    # docprob = (1 - alpha_d) * self.background[wordID]
+                    docprob = background[wordID]
                     qryprob = weight
                     if result[docID] != -9999:
                         result[docID] += cosine_similarity(qryprob, docprob)
@@ -62,8 +62,8 @@ class SearchEngine(object):
                 for docID, val in self.inv_index[wordID].iteritems():
                     existDoc[docID] = 1
                     # smooth doc model by background
-                    # alpha_d = docleng[docID] / (docleng[docID] + self.alpha)
-                    # docprob = (1 - alpha_d) * background[wordID] + alpha_d * val
+                    # alpha_d = self.doclengs[docID] / (self.doclengs[docID] + self.alpha)
+                    # docprob = (1 - alpha_d) * self.background[wordID] + alpha_d * val
                     docprob = val
                     qryprob = weight
                     if result[docID] != -9999:
@@ -73,9 +73,9 @@ class SearchEngine(object):
 
                 for docID, val in result.iteritems():
                     if not existDoc.has_key(docID) and self.background.has_key(wordID):
-                        # alpha_d = docleng[docID] / (docleng[docID] + self.alpha)
-                        # docprob = (1 - alpha_d) * background[wordID]
-                        docprob = val
+                        # alpha_d = self.doclengs[docID] / (self.doclengs[docID] + self.alpha)
+                        # docprob = (1 - alpha_d) * self.background[wordID]
+                        docprob = self.background[wordID]
                         qryprob = weight
                         if result[docID] != -9999:
                             result[docID] -= self.beta * cosine_similarity(qryprob, docprob)
