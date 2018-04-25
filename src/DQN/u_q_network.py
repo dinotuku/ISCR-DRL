@@ -57,11 +57,12 @@ class DeepQLearner:
         self.update_counter = 0
 
         self.l_out = self.build_network(network_type, input_width, input_height,
-                                        num_actions, num_frames, batch_size, dueling=self.dueling)
+                                        num_actions, num_frames, batch_size, 
+                                        dueling=self.dueling)
         if self.freeze_interval > 0:
-            self.next_l_out = self.build_network(network_type, input_width,
-                                                input_height, num_actions,
-                                                num_frames, batch_size, dueling=self.dueling)
+            self.next_l_out = self.build_network(network_type, input_width, input_height,
+                                                 num_actions, num_frames, batch_size, 
+                                                 dueling=self.dueling)
             self.reset_q_hat()
 
         states = T.tensor4('states')
@@ -99,33 +100,32 @@ class DeepQLearner:
         if self.freeze_interval > 0:
             if self.dueling:
                 next_v_vals, next_a_vals = lasagne.layers.get_output(self.next_l_out,
-                                                        next_states / input_scale)
+                    next_states / input_scale)
                 next_q_vals = next_v_vals + next_a_vals - T.mean(next_a_vals, axis=1, keepdims=True)
             else:
-                next_q_vals = lasagne.layers.get_output(self.next_l_out,
-                                                        next_states / input_scale)
+                next_q_vals = lasagne.layers.get_output(self.next_l_out, next_states / input_scale)
         else:
             if self.dueling:
                 next_v_vals, next_a_vals = lasagne.layers.get_output(self.l_out,
-                                                        next_states / input_scale)
-                next_q_vals = next_v_vals + next_a_vals - T.mean(next_a_vals, axis=1, keepdims=True)
+                    next_states / input_scale)
+                next_q_vals = next_v_vals + next_a_vals - T.mean(next_a_vals, axis=1, keepdims=True) 
             else:
                 next_q_vals = lasagne.layers.get_output(self.l_out,
-                                                        next_states / input_scale)
+                    next_states / input_scale)
         next_q_vals = theano.gradient.disconnected_grad(next_q_vals)
 
         if self.double:
             argmax_q_vals = T.argmax(q_vals, axis=1)
-            target = (rewards +
-                    (T.ones_like(terminals) - terminals) *
-                    self.discount * next_q_vals[:, argmax_q_vals])
+            target = (rewards + 
+                      (T.ones_like(terminals) - terminals) *
+                      self.discount * next_q_vals[:, argmax_q_vals])
         else:
             target = (rewards +
-                    (T.ones_like(terminals) - terminals) *
-                    self.discount * T.max(next_q_vals, axis=1, keepdims=True))
-
+                      (T.ones_like(terminals) - terminals) *
+                      self.discount * T.max(next_q_vals, axis=1, keepdims=True))
+        
         diff = target - q_vals[T.arange(batch_size),
-                            actions.reshape((-1,))].reshape((-1, 1))
+            actions.reshape((-1,))].reshape((-1, 1))
 
         if self.clip_delta > 0:
             # If we simply take the squared clipped diff as our loss,
@@ -151,7 +151,7 @@ class DeepQLearner:
             raise ValueError("Bad accumulator: {}".format(batch_accumulator))
 
         params = lasagne.layers.helper.get_all_params(self.l_out)
-
+        
         givens = {
             states: self.states_shared,
             next_states: self.next_states_shared,
@@ -162,16 +162,16 @@ class DeepQLearner:
 
         if update_rule == 'deepmind_rmsprop':
             updates = deepmind_rmsprop(loss, params, self.lr, self.rho,
-                                    self.rms_epsilon)
+                                       self.rms_epsilon)
         elif update_rule == 'rmsprop':
             updates = lasagne.updates.rmsprop(loss, params, self.lr, self.rho,
                                               self.rms_epsilon)
         elif update_rule == 'adagrad':
             updates = lasagne.updates.adagrad(loss, params, self.lr,
-                                self.rms_epsilon)
+                                              self.rms_epsilon)
         elif update_rule == 'adadelta':
             updates = lasagne.updates.adadelta(loss, params, self.lr, self.rho,
-                            self.rms_epsilon)
+                                               self.rms_epsilon)
         elif update_rule == 'sgd':
             updates = lasagne.updates.sgd(loss, params, self.lr)
         else:
@@ -184,7 +184,7 @@ class DeepQLearner:
             updates = lasagne.updates.apply_nesterov_momentum(updates, None, self.nesterov_momentum)
 
         self._train = theano.function([], [loss, q_vals], updates=updates,
-                                          givens=givens)
+                                      givens=givens)
 
         self._q_vals = theano.function([], q_vals,
                                        givens=givens, on_unused_input='ignore')
@@ -232,7 +232,6 @@ class DeepQLearner:
 
         Returns: average loss
         """
-
         self.states_shared.set_value(states)
         self.next_states_shared.set_value(next_states)
         self.actions_shared.set_value(actions)
@@ -252,17 +251,9 @@ class DeepQLearner:
         self.states_shared.set_value(states)
         return self._q_vals()[0]
 
-    def a_vals(self, state):
-        states = np.zeros((self.batch_size, self.num_frames, self.input_height,
-                           self.input_width), dtype=theano.config.floatX)
-        states[0, ...] = state
-        self.states_shared.set_value(states)
-        return self._a_vals()[0]
-
     def choose_action(self, state, epsilon):
         if self.rng.rand() < epsilon:
             return self.rng.randint(0, self.num_actions)
-
         q_vals = self.q_vals(state)
         action = np.argmax(q_vals)
         return action
@@ -270,23 +261,6 @@ class DeepQLearner:
     def reset_q_hat(self):
         all_params = lasagne.layers.helper.get_all_param_values(self.l_out)
         lasagne.layers.helper.set_all_param_values(self.next_l_out, all_params)
-
-    def hard_update(self):
-        a_params = lasagne.layers.helper.get_all_param_values(self.ae_out)
-        c_params = lasagne.layers.helper.get_all_param_values(self.ce_out)
-        lasagne.layers.helper.set_all_param_values(self.at_out, a_params)
-        lasagne.layers.helper.set_all_param_values(self.ct_out, c_params)
-
-    def soft_update(self):
-        tau = 0.001
-        at_params = lasagne.layers.helper.get_all_param_values(self.at_out)
-        ct_params = lasagne.layers.helper.get_all_param_values(self.ct_out)
-        ae_params = lasagne.layers.helper.get_all_param_values(self.ae_out)
-        ce_params = lasagne.layers.helper.get_all_param_values(self.ce_out)
-        a_params = [at_param * (1 - tau) + ae_param * tau for (at_param, ae_param) in zip(at_params, ae_params)]
-        c_params = [ct_param * (1 - tau) + ce_param * tau for (ct_param, ce_param) in zip(ct_params, ce_params)]
-        lasagne.layers.helper.set_all_param_values(self.at_out, a_params)
-        lasagne.layers.helper.set_all_param_values(self.ct_out, c_params)
 
     def build_nature_network(self, input_width, input_height, output_dim,
                              num_frames, batch_size):
@@ -517,7 +491,7 @@ class DeepQLearner:
         )
 
         return l_out
-
+    
     def build_rl_network_dnn(self, input_width, input_height, output_dim,
                             num_frames, batch_size, dueling):
 
@@ -527,7 +501,7 @@ class DeepQLearner:
         layer = lasagne.layers.InputLayer(
             shape=(batch_size, num_frames, input_width, input_height)
         )
-
+    
         for _ in xrange(self.network_height):
             layer = lasagne.layers.DenseLayer(
                 layer,

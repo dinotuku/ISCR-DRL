@@ -1,4 +1,4 @@
-# Interactive Spoken Content Retrieval
+# Interactive Spoken Content Retrieval (Trainable User Simulator)
 
 ### Installation
   1. Lasagne, Theano

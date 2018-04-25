@@ -12,9 +12,11 @@ def run_merge_csvs(result_dir):
 
     maps = []
     returns = []
+    success_rates = []
     for _ in range(nfiles):
         maps.append(list())
         returns.append(list())
+        success_rates.append(list())
 
     for idx, log_filepath in enumerate(log_filepaths):
         with open(log_filepath, 'r') as f:
@@ -25,18 +27,21 @@ def run_merge_csvs(result_dir):
 
                     MAP = tokens[2]
                     Return = tokens[5]
+                    Success_rate = tokens[9][:-1]
 
                     maps[idx].append(float(MAP))
                     returns[idx].append(float(Return))
+                    success_rates[idx].append(float(Success_rate))
 
     header = ['epoch'] + list(range(1, nfiles + 1, 1)) + ['MAP_average'] + \
         list(range(1, nfiles + 1, 1)) + ['Return_average']
 
     epoch_length = len(maps[0])
     # Check Log File Inconsistencies
-    for m, r in zip(maps, returns):
+    for m, r, s in zip(maps, returns, success_rates):
         assert len(m) == epoch_length
         assert len(r) == epoch_length
+        assert len(s) == epoch_length
 
     merged_data = []
     for epoch_idx in range(epoch_length):
@@ -46,7 +51,10 @@ def run_merge_csvs(result_dir):
         ret_data = [r[epoch_idx] for r in returns]
         ret_avg = np.mean(ret_data)
 
-        row_data = map_data + [map_avg] + ret_data + [ret_avg]
+        suc_data = [s[epoch_idx] for s in success_rates]
+        suc_avg = np.mean(suc_data)
+
+        row_data = map_data + [map_avg] + ret_data + [ret_avg] + suc_data + [suc_avg]
         merged_data.append(row_data)
 
     merged_csv = os.path.join(result_dir, 'merged.csv')

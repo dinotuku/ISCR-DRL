@@ -8,5 +8,5 @@
 
 for i in {1..10}
 do
-    python run_training.py -f ${i} --feature ${1} --directory ${2} --result ${3} --name ${4}
+    THEANO_FLAGS=device=gpu0,floatX=float32 python run_training.py -f ${i} --feature raw --directory /home_local/chung95191/ISCR-DRL/data/onebest_CMVN --result ../result_survey --name 4_
 done

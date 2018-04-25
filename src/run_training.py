@@ -1,9 +1,16 @@
+"""
+Run ISCR Training Procedure
+"""
 import argparse
 import os
 
 from experiment import Experiment
 
-if __name__ == "__main__":
+def main():
+    """Main function
+
+    Define parser and set all arguments
+    """
     #################################
     #        Argument Parser        #
     #################################
@@ -20,12 +27,19 @@ if __name__ == "__main__":
     parser.add_argument("--use_survey", action="store_true", help="use survey prob distributions, overrides choose_random_topic", default=False)
 
     # Training Arguments
-    parser.add_argument("--num_epochs", type=int, help="number of epochs | default=100", default=100)
+    parser.add_argument("--num_epochs", type=int, help="number of epochs | default=100", default=200)
+
+    # Reinforce Arguments
+    parser.add_argument("--iterative", type=int, help="number of iterative | default=500", default=500)
 
     # Saving Path Arguments
-    parser.add_argument("--save_feature", action="store_true", help="save encountered features to file", default = False)
+    parser.add_argument("--save_feature", action="store_true", help="save encountered features to file", default=False)
     parser.add_argument("--name", type=str, help="experiment name", default=None)
     parser.add_argument("--result", type=str, help="result directory", default=None)
+    parser.add_argument("--agent_double", action="store_true", help="use double dqn for agent", default=False)
+    parser.add_argument("--user_double", action="store_true", help="use double dqn for user", default=False)
+    parser.add_argument("--agent_dueling", action="store_true", help="use dueling dqn for agent", default=False)
+    parser.add_argument("--user_dueling", action="store_true", help="use dueling dqn for user", default=False)
 
     # parse args
     args = parser.parse_args()
@@ -57,7 +71,11 @@ if __name__ == "__main__":
         'model_height': 2,
         'learning_rate': 0.00025,
         'clip_delta': 1.0,
-        'update_rule': 'deepmind_rmsprop'
+        'update_rule': 'deepmind_rmsprop',
+        'agent_double': args.agent_double,
+        'user_double': args.user_double,
+        'agent_dueling': args.agent_dueling,
+        'user_dueling': args.user_dueling
     }
 
     reinforce_args = {
@@ -68,7 +86,8 @@ if __name__ == "__main__":
         'epsilon_min': 0.1,
         'epsilon_start': 1.0,
         'freeze_interval': 500,
-        'update_frequency': 1
+        'update_frequency': 1,
+        'iterative_frequency': args.iterative,
     }
 
     ###############################
@@ -76,3 +95,6 @@ if __name__ == "__main__":
     ###############################
     exp = Experiment(retrieval_args, training_args, reinforce_args)
     exp.run()
+
+if __name__ == '__main__':
+    main()

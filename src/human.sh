@@ -1,0 +1,1 @@
+THEANO_FLAGS=device=gpu0,floatX=float32 python run_training.py -f -1 --feature all --directory /home_local/chung95191/ISCR-DRL/data/onebest_CMVN --result /home_local/chung95191/ISCR-DRL/result_survey --name human --agent_double --agent_dueling --user_double --user_dueling

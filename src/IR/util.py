@@ -1,8 +1,7 @@
 import sys
 import os
 import operator
-from .retmath import *
-
+from retmath import *
 
 def readLex(fname):
     fin = file(fname)
@@ -14,7 +13,6 @@ def readLex(fname):
         lex[word] = num
     return lex
 
-
 def readList(fname):
     fin = file(fname)
     lst = []
@@ -23,25 +21,22 @@ def readList(fname):
         lst.append(word)
     return lst
 
-
 def docNameToIndex(fname):
     return int(fname[1:])
-
 
 def IndexToDocName(index):
     name = 'T'
     if index < 10:
         name += '000' + str(index)
     elif index < 100:
-        name += '00' + str(index)
+        name += '00'  + str(index)
     elif index < 1000:
-        name += '0' + str(index)
+        name += '0'   + str(index)
     else:
         name += str(index)
     return name
 
-
-def readQuery(fname, lex):
+def readQuery(fname,lex):
     fin = file(fname)
     queries = []
     for line in fin.readlines():
@@ -57,7 +52,6 @@ def readQuery(fname, lex):
     fin.close()
     return queries
 
-
 def readFoldQueries(fname):
     fin = file(fname)
     queries = []
@@ -65,12 +59,12 @@ def readFoldQueries(fname):
     for line in fin.readlines():
         pair = line.replace('\n', '').split('\t')
         tokens = pair[1].split()
-        query = {}
-        for i in range(len(tokens)):
-            p = tokens[i].split(':')
-            query[int(p[0])] = float(p[1])
-        queries.append(query)
-        indexes.append(int(pair[0]))
+    query = {}
+    for i in range(len(tokens)):
+        p = tokens[i].split(':')
+        query[int(p[0])] = float(p[1])
+    queries.append(query)
+    indexes.append(int(pair[0]))
     fin.close()
     return queries, indexes
 
@@ -80,11 +74,10 @@ def writeQueryFold(fname, queries, indexes):
     for i in range(len(queries)):
         q = queries[i]
         fout.write(str(indexes[i]) + '\t')
-        for wordID, val in sorted(q.items(), key=operator.itemgetter(0)):
-            fout.write(str(wordID) + ':' + str(val) + ' ')
-        fout.write('\n')
+    for wordID, val in sorted(q.iteritems(), key=operator.itemgetter(0)):
+        fout.write(str(wordID) + ':' + str(val) + ' ')
+    fout.write('\n')
     fout.close()
-
 
 def readInvIndex(fname):
     fin = file(fname)
@@ -103,7 +96,6 @@ def readInvIndex(fname):
     fin.close()
     return inv_index
 
-
 def readCleanInvIndex(fname):
     fin = file(fname)
     inv_index = {}
@@ -120,7 +112,6 @@ def readCleanInvIndex(fname):
     fin.close()
     return inv_index
 
-
 def readBackground(fname, lex):
     fin = file(fname)
     background = {}
@@ -132,19 +123,17 @@ def readBackground(fname, lex):
     fin.close()
     return background
 
-
 def readAnswer(fname, lex):
     fin = file(fname)
     answer = []
-    for i in range(163):
+    for _ in range(163):
         answer.append({})
     for line in fin.readlines():
         tokens = line.replace('\n', '').split()
         index = int(tokens[0])
         docID = docNameToIndex(tokens[2])
-        answer[index - 1][docID] = 1
+        answer[index-1][docID] = 1
     return answer
-
 
 def readDocLength(fname):
     fin = file(fname)
@@ -157,7 +146,6 @@ def readDocLength(fname):
     fin.close()
     return docLengs
 
-
 def readDocModel(fname):
     fout = file(fname)
     model = {}
@@ -168,16 +156,14 @@ def readDocModel(fname):
         model[word] = val
     return model
 
-
 def printRetrievedList(retrieved, fname):
     fout = file(fname, 'w')
     for i in range(len(retrieved)):
         list = retrieved[i]
         for key, val in list:
-            fout.write(str(i + 1) + ' ' + str(i + 1) + ' ' + IndexToDocName(key) +
-                       ' 0 ' + str(val) + ' EXP\n')
+            fout.write(str(i+1)+' '+str(i+1)+' '+IndexToDocName(key)+ \
+                ' 0 '+str(val)+ ' EXP\n')
     fout.close()
-
 
 def readKeytermlist(cpsID, fileIDs):
     keyterms = {}
@@ -186,7 +172,7 @@ def readKeytermlist(cpsID, fileIDs):
     elif cpsID == 'lattice.CMVN':
         cpsID = 'onebest.CMVN'
 
-    for fileID, prob in fileIDs.items():
+    for fileID, prob in fileIDs.iteritems():
         filename = '../data/ISDR-CMDP/keyterm/' + cpsID + '/' + str(fileID)
         if not os.path.isfile(filename):
             continue
@@ -201,14 +187,13 @@ def readKeytermlist(cpsID, fileIDs):
             else:
                 keyterms[int(pair[0])] = prob * float(pair[1])
         fin.close()
-    sortedKeytermlst = sorted(keyterms.items(), key=operator.itemgetter(1), reverse=True)
+    sortedKeytermlst = sorted(keyterms.iteritems(), key=operator.itemgetter(1), reverse=True)
     return sortedKeytermlst
-
 
 def readRequestlist(cpsID, fileIDs):
     requests = {}
-    for fileID, prob in fileIDs.items():
-        filename = '../data/ISDR-CMDP/request/' + cpsID + '/' + str(fileID)
+    for fileID, prob in fileIDs.iteritems():
+        filename = '../data/ISDR-CMDP/request/'+cpsID+'/'+str(fileID)
         if not os.path.isfile(filename):
             continue
         fin = file(filename)
@@ -219,8 +204,7 @@ def readRequestlist(cpsID, fileIDs):
             else:
                 requests[int(pair[0])] = float(pair[1])
         fin.close()
-    return sorted(requests.items(), key=operator.itemgetter(1), reverse=True)
-
+    return sorted(requests.iteritems(), key=operator.itemgetter(1), reverse=True)
 
 def readTopicWords(cpsID):
     topicWordList = []
@@ -237,14 +221,13 @@ def readTopicWords(cpsID):
         topicWordList.append(words)
     return topicWordList
 
-
 def sortTopicByKLtoAnswer(docmodeldir, ans, doclengs, topiclst):
     answer = {}
-    for docID in ans.keys():
+    for docID in ans.iterkeys():
         fname = docmodeldir + IndexToDocName(docID)
         leng = doclengs[docID]
         docmodel = readDocModel(fname)
-        for term, prob in docmodel.items():
+        for term,prob in docmodel.iteritems():
             if answer.has_key(term):
                 answer[term] += leng * prob
             else:
@@ -253,8 +236,7 @@ def sortTopicByKLtoAnswer(docmodeldir, ans, doclengs, topiclst):
     for i in range(len(topiclst)):
         topicWords = topiclst[i]
         score = 0
-        sortwords = sorted(topicWords.items(),
-                           key=operator.itemgetter(1), reverse=True)
+        sortwords = sorted(topicWords.iteritems(), key=operator.itemgetter(1), reverse=True)
         for term, prob in sortwords:
             if answer.has_key(term):
                 score += cross_entropy(answer[term], prob)
@@ -263,19 +245,16 @@ def sortTopicByKLtoAnswer(docmodeldir, ans, doclengs, topiclst):
         ranking.append((i, score))
     return sorted(ranking, key=operator.itemgetter(1), reverse=True)
 
-
 def sortTopicByInferenceProb(cpsID):
     rankings = []
-    fin = file('../data/ISDR-CMDP/ldadist/' + cpsID + '.dist')
+    fin = file('../data/ISDR-CMDP/ldadist/'+cpsID+'.dist')
     for line in fin.readlines():
         ranking = []
         tokens = line.split()
         for i in range(len(tokens)):
             ranking.append((i, float(tokens[i])))
-        rankings.append(
-            sorted(ranking, key=operator.itemgetter(1), reverse=True))
+        rankings.append(sorted(ranking, key=operator.itemgetter(1), reverse=True))
     return rankings
-
 
 def readTopicList(cpsID, qID):
     ranking = []
@@ -285,31 +264,28 @@ def readTopicList(cpsID, qID):
         ranking.append((int(float(tokens[0])), float(tokens[1])))
     return ranking
 
-
 def renormalize(dictdist):
     Z = sum(dictdist.values())
-    for term in dictdist.keys():
+    for term in dictdist.iterkeys():
         dictdist[term] /= Z
     return dictdist
-
 
 def pruneAndNormalize(dictdist, num, leng=50):
     cnt = 0
     newdict = {}
-    for term, prob in sorted(dictdist.items(), key=operator.itemgetter(1), reverse=True):
+    for term, prob in sorted(dictdist.iteritems(), key=operator.itemgetter(1), reverse=True):
         if cnt <= num:
-            newdict[term] = leng * prob
+            newdict[term] = leng*prob
         else:
             break
         cnt += 1
     return renormalize(newdict)
 
-
 def readStateFeatures(fname):
     fin = file(fname)
     labels = []
     features = []
-    for line in fin.readlines():  # for each data
+    for line in fin.readlines(): # for each data
         pair = line.split('\t')
         if len(pair) != 2 or len(pair[1].split()) != 94:
             continue
@@ -326,22 +302,21 @@ def readStateFeatures(fname):
         if jumpthrough:
             continue
 
-        #del feature[7]
-        #del feature[1]
-        acts = [0.0, 0.0, 0.0, 0.0]
-        actions = feature[1:5]
-        for a in actions:
-            if a != 0:
-                acts[int(a) - 1] += 1.0
-        processedFeature = []
-        processedFeature.extend(feature[:1])
-        # processedFeature.extend(acts)
-        processedFeature.extend(feature[6:])
-        processedFeature.insert(0, 1.0)
-        labels.append([float(pair[0])])
-        features.append(processedFeature)
+	# del feature[7]
+	# del feature[1]
+    acts = [0.0, 0.0, 0.0, 0.0]
+    actions = feature[1:5]
+    for a in actions:
+        if a != 0:
+            acts[int(a) - 1] += 1.0
+    processedFeature = []
+    processedFeature.extend(feature[:1])
+    # processedFeature.extend(acts)
+    processedFeature.extend(feature[6:])
+    processedFeature.insert(0, 1.0)
+    labels.append([float(pair[0])])
+    features.append(processedFeature)
     return features, labels
-
 
 def readWeights(fname):
     fin = file(fname)
