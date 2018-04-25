@@ -1,0 +1,7 @@
+*.pyc
+*.pickle
+*.pkl
+
+data/
+
+result_survey/
