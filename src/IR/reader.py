@@ -14,11 +14,10 @@ import sys
 def readLex(fname):
     fin = file(fname)
     lex = {}
-    num = 0
     for line in fin.readlines():
-        word = line.replace('\n', '')
-        num += 1
-        lex[word] = num
+        word = line.replace('\n', '').split()[0]
+        idx = int(line.replace('\n', '').split()[1])
+        lex[word] = idx
     return lex
 
 
@@ -117,7 +116,7 @@ def readRequestlist(request_dir, fileIDs):
 
 def readTopicWords(topic_dir):
     topic_word_list = []
-    for i in range(256):
+    for i in range(128):
         topic_filepath = os.path.join(topic_dir, str(i))
         if not os.path.isfile(topic_filepath):
             logging.debug("topic file {} does not exist!".format(topic_filepath))
@@ -161,7 +160,16 @@ def docNameToIndex(fname):
 
 def IndexToDocName(index):
     name = 'T'
-    name += str(index)
+    if index < 10:
+        name += '0000' + str(index)
+    elif index < 100:
+        name += '000'  + str(index)
+    elif index < 1000:
+        name += '00'   + str(index)
+    elif index < 10000:
+        name += '0'   + str(index)
+    else:
+        name += str(index)
     return name
 
 

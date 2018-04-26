@@ -1,7 +1,7 @@
 import logging
 import operator
 
-from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
 
 from retmath import cross_entropy
 import reader
@@ -19,7 +19,7 @@ class SearchEngine(object):
         self.alpha = alpha
         self.beta = beta
 
-    def retrieve(query, negquery=None):
+    def retrieve(self, query, negquery=None):
         """
             Retrieves result using query and negquery if negquery exists
         """
@@ -27,9 +27,13 @@ class SearchEngine(object):
         for i in range(0, len(self.doclengs), 1):
             result[i] = -9999
         # Query
+        weight_history = []
+        doc_val_history = []
         for wordID, weight in query.iteritems():
+            weight_history.append(weight)
             existDoc = {}
             for docID, val in self.inv_index[wordID].iteritems():
+                doc_val_history.append(val)
                 existDoc[docID] = 1
                 # smooth doc model by background
                 # alpha_d = self.doclengs[docID] / (self.doclengs[docID] + self.alpha)
@@ -39,21 +43,22 @@ class SearchEngine(object):
 
                 # Adds to result
                 if result[docID] != -9999:
-                    result[docID] += cosine_similarity(qryprob, docprob)
+                    result[docID] += (docprob * qryprob)
                 else:
-                    result[docID] = cosine_similarity(qryprob, docprob)
+                    result[docID] = (docprob * qryprob)
 
             # Run background model
             for docID, val in result.iteritems():
                 if not existDoc.has_key(docID) and self.background.has_key(wordID):
+                    doc_val_history.append(val)
                     # alpha_d = self.doclengs[docID] / (self.doclengs[docID] + self.alpha)
                     # docprob = (1 - alpha_d) * self.background[wordID]
-                    docprob = background[wordID]
+                    docprob = self.background[wordID]
                     qryprob = weight
                     if result[docID] != -9999:
-                        result[docID] += cosine_similarity(qryprob, docprob)
+                        result[docID] += (docprob * qryprob)
                     else:
-                        result[docID] = cosine_similarity(qryprob, docprob)
+                        result[docID] = (docprob * qryprob)
 
         # Run through negative query
         if negquery:
@@ -67,9 +72,9 @@ class SearchEngine(object):
                     docprob = val
                     qryprob = weight
                     if result[docID] != -9999:
-                        result[docID] -= self.beta * cosine_similarity(qryprob, docprob)
+                        result[docID] -= self.beta * (docprob * qryprob)
                     else:
-                        result[docID] = -1 * self.beta * cosine_similarity(qryprob, docprob)
+                        result[docID] = -1 * self.beta * (docprob * qryprob)
 
                 for docID, val in result.iteritems():
                     if not existDoc.has_key(docID) and self.background.has_key(wordID):
@@ -78,9 +83,9 @@ class SearchEngine(object):
                         docprob = self.background[wordID]
                         qryprob = weight
                         if result[docID] != -9999:
-                            result[docID] -= self.beta * cosine_similarity(qryprob, docprob)
+                            result[docID] -= self.beta * (docprob * qryprob)
                         else:
-                            result[docID] = -1 * self.beta * cosine_similarity(qryprob, docprob)
+                            result[docID] = -1 * self.beta * (docprob * qryprob)
 
         sorted_ret = sorted(result.iteritems(), key=operator.itemgetter(1),reverse=True)	
         return sorted_ret
