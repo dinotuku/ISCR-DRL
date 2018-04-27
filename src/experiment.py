@@ -273,7 +273,7 @@ class Experiment(object):
 
         num_steps = 0
         while True:
-            reward, state = self.env.step(action) # ENVIRONMENT STEP
+            reward, state, ans_list, ret_list, ret_score = self.env.step(action) # ENVIRONMENT STEP
             terminal, AP  = self.env.game_over()
             self.act_stat[ action ] += 1
             num_steps += 1
@@ -285,7 +285,11 @@ class Experiment(object):
             # Antonie: Why do this?
             if test_flag: # and action != 4:
                 AM = self.env.dialoguemanager.actionmanager
-                logging.debug('action : %d %s\tcost : %s\tAP : %f\treward : %f',action,AM.actionTable[ action ],AM.costTable[ action ],AP,reward)
+                logging.debug("action : %d %s\tcost : %s\tAP : %f\treward : %f",action,AM.actionTable[ action ],AM.costTable[ action ],AP,reward)
+                logging.debug("Ans : %s", ' '.join(map(str, ans_list)))
+                logging.debug("Ret : %s", ' '.join(map(str, ret_list[:40])))
+                logging.debug("Ret Score : %s", ' '.join(map(str, ret_score[:40])))
+                logging.debug("Ret length : %d", len(ret_list))
 
             if num_steps >= max_steps or terminal:  # STOP Retrieve
                 self.agent.end_episode(reward, terminal)
