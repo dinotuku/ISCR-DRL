@@ -42,9 +42,9 @@ class SearchEngine(object):
 
                 # Adds to result
                 if result[docID] != -9999:
-                    result[docID] += cross_entropy(docprob * qryprob)
+                    result[docID] += cross_entropy(docprob, qryprob)
                 else:
-                    result[docID] = cross_entropy(docprob * qryprob)
+                    result[docID] = cross_entropy(docprob, qryprob)
 
             # Run background model
             for docID, val in result.iteritems():
@@ -54,9 +54,9 @@ class SearchEngine(object):
                     docprob = (1 - alpha_d) * self.background[wordID]
                     qryprob = weight
                     if result[docID] != -9999:
-                        result[docID] += cross_entropy(docprob * qryprob)
+                        result[docID] += cross_entropy(docprob, qryprob)
                     else:
-                        result[docID] = cross_entropy(docprob * qryprob)
+                        result[docID] = cross_entropy(docprob, qryprob)
 
         # Run through negative query
         if negquery:
@@ -69,9 +69,9 @@ class SearchEngine(object):
                     docprob = (1 - alpha_d) * self.background[wordID] + alpha_d * val
                     qryprob = weight
                     if result[docID] != -9999:
-                        result[docID] -= self.beta * cross_entropy(docprob * qryprob)
+                        result[docID] -= self.beta * cross_entropy(docprob, qryprob)
                     else:
-                        result[docID] = -1 * self.beta * cross_entropy(docprob * qryprob)
+                        result[docID] = -1 * self.beta * cross_entropy(docprob, qryprob)
 
                 for docID, val in result.iteritems():
                     if not existDoc.has_key(docID) and self.background.has_key(wordID):
@@ -79,9 +79,9 @@ class SearchEngine(object):
                         docprob = (1 - alpha_d) * self.background[wordID]
                         qryprob = weight
                         if result[docID] != -9999:
-                            result[docID] -= self.beta * cross_entropy(docprob * qryprob)
+                            result[docID] -= self.beta * cross_entropy(docprob, qryprob)
                         else:
-                            result[docID] = -1 * self.beta * cross_entropy(docprob * qryprob)
+                            result[docID] = -1 * self.beta * cross_entropy(docprob, qryprob)
 
         sorted_ret = sorted(result.iteritems(), key=operator.itemgetter(1),reverse=True)	
         return sorted_ret
