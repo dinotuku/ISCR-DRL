@@ -209,7 +209,7 @@ def readRequestlist(cpsID,fileIDs):
 
 def readTopicWords(cpsID):
   topicWordList = []
-  for i in range(128):
+  for i in range(256):
     words = {}
     filename = '../data/ISDR-CMDP/lda/' + cpsID + '/'+str(i)
     fin = file(filename)

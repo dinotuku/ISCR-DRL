@@ -116,7 +116,7 @@ def readRequestlist(request_dir, fileIDs):
 
 def readTopicWords(topic_dir):
     topic_word_list = []
-    for i in range(128):
+    for i in range(256):
         topic_filepath = os.path.join(topic_dir, str(i))
         if not os.path.isfile(topic_filepath):
             logging.debug("topic file {} does not exist!".format(topic_filepath))

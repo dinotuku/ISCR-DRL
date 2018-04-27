@@ -50,7 +50,7 @@ def genActionTable():
 ##########################
 class ActionManager(object):
     def __init__(self, background, doclengs, data_dir, survey,\
-                    topicleng=128, topicnumword=500):
+                    topicleng=256, topicnumword=500):
 
         self.background  = background
         self.doclengs    = doclengs

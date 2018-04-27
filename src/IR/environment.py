@@ -66,7 +66,7 @@ class Environment(object):
 
     ans_list = [idx for idx, _ in self.dialoguemanager.ans.iteritems()]
     ret_list = [idx for idx, _ in self.dialoguemanager.ret]
-    ret_score = [idx for _, score in self.dialoguemanager.ret]
+    ret_score = [score for _, score in self.dialoguemanager.ret]
 
     return reward, feature, ans_list, ret_list, ret_score
 
