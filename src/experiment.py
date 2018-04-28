@@ -266,6 +266,8 @@ class Experiment(object):
         action = self.agent.start_episode(state)
         if test_flag and action != 4:
             logging.debug('action : -1 first pass\t\tAP : %f', self.env.dialoguemanager.MAP)
+            logging.debug("Ans : %s", ' '.join(map(str, [idx for idx, _ in self.env.dialoguemanager.ans.iteritems()])))
+            logging.debug("Ret : %s", ' '.join(map(str, [idx for idx, _ in self.env.dialoguemanager.ret][:60])))
 
         # Save state
         if self.feature_handle is not None:
@@ -273,7 +275,7 @@ class Experiment(object):
 
         num_steps = 0
         while True:
-            reward, state, ans_list, ret_list, ret_score = self.env.step(action) # ENVIRONMENT STEP
+            reward, state = self.env.step(action) # ENVIRONMENT STEP
             terminal, AP  = self.env.game_over()
             self.act_stat[ action ] += 1
             num_steps += 1
@@ -286,10 +288,8 @@ class Experiment(object):
             if test_flag: # and action != 4:
                 AM = self.env.dialoguemanager.actionmanager
                 logging.debug("action : %d %s\tcost : %s\tAP : %f\treward : %f",action,AM.actionTable[ action ],AM.costTable[ action ],AP,reward)
-                logging.debug("Ans : %s", ' '.join(map(str, ans_list)))
-                logging.debug("Ret : %s", ' '.join(map(str, ret_list[:40])))
-                logging.debug("Ret Score : %s", ' '.join(map(str, ret_score[:40])))
-                logging.debug("Ret length : %d", len(ret_list))
+                logging.debug("Ans : %s", ' '.join(map(str, [idx for idx, _ in self.env.dialoguemanager.ans.iteritems()])))
+                logging.debug("Ret : %s", ' '.join(map(str, [idx for idx, _ in self.env.dialoguemanager.ret][:60])))
 
             if num_steps >= max_steps or terminal:  # STOP Retrieve
                 self.agent.end_episode(reward, terminal)

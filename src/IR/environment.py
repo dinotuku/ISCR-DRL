@@ -64,11 +64,7 @@ class Environment(object):
     # Calculate Reward  (Must be retrieval reward + user reward?)
     reward = self.dialoguemanager.calculate_reward() #+ np.random.normal(0,self.reward_std)
 
-    ans_list = [idx for idx, _ in self.dialoguemanager.ans.iteritems()]
-    ret_list = [idx for idx, _ in self.dialoguemanager.ret]
-    ret_score = [score for _, score in self.dialoguemanager.ret]
-
-    return reward, feature, ans_list, ret_list, ret_score
+    return reward, feature
 
   def game_over(self):
     return self.dialoguemanager.game_over()
