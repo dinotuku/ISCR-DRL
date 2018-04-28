@@ -266,7 +266,7 @@ class Experiment(object):
         action = self.agent.start_episode(state)
         if test_flag and action != 4:
             logging.debug('action : -1 first pass\t\tAP : %f', self.env.dialoguemanager.MAP)
-            logging.debug("Ans : %s", ' '.join(map(str, [idx for idx, _ in self.env.dialoguemanager.ans.iteritems()])))
+            logging.debug("Ans : %s", ' '.join(map(str, [idx for idx, _ in ans.iteritems()])))
             logging.debug("Ret : %s", ' '.join(map(str, [idx for idx, _ in self.env.dialoguemanager.ret][:60])))
 
         # Save state
@@ -288,7 +288,7 @@ class Experiment(object):
             if test_flag: # and action != 4:
                 AM = self.env.dialoguemanager.actionmanager
                 logging.debug("action : %d %s\tcost : %s\tAP : %f\treward : %f",action,AM.actionTable[ action ],AM.costTable[ action ],AP,reward)
-                logging.debug("Ans : %s", ' '.join(map(str, [idx for idx, _ in self.env.dialoguemanager.ans.iteritems()])))
+                logging.debug("Ans : %s", ' '.join(map(str, [idx for idx, _ in ans.iteritems()])))
                 logging.debug("Ret : %s", ' '.join(map(str, [idx for idx, _ in self.env.dialoguemanager.ret][:60])))
 
             if num_steps >= max_steps or terminal:  # STOP Retrieve
