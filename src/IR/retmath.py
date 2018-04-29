@@ -2,7 +2,7 @@ import math
 import operator
 
 def cross_entropy(p1,p2):
-  return ( 0 if p2 == 0 else -1 * p1 * math.log(p1/p2))
+  return ( 0 if p1 == 0 or p2 == 0 else -1 * p1 * math.log(p1/p2))
 
 def renormalize(distdict):
   Z = sum(distdict.values())
