@@ -1,6 +1,7 @@
 import logging
 import os
 import random
+import cPickle
 
 import numpy as np
 from progressbar import ProgressBar,Percentage,Bar,ETA
@@ -17,7 +18,7 @@ from IR import reader
 #          Experiment         #
 ###############################
 class Experiment(object):
-    def __init__(self,retrieval_args, training_args, reinforce_args):
+    def __init__(self, retrieval_args, training_args, reinforce_args, testing_args={}):
         print('Initializing experiment...')
         self.set_logging(retrieval_args)
 
@@ -25,7 +26,7 @@ class Experiment(object):
 
         self.env = Experiment.set_environment(retrieval_args)
 
-        self.agent = Experiment.set_agent(retrieval_args, training_args, reinforce_args,\
+        self.agent = Experiment.set_agent(retrieval_args, training_args, reinforce_args, testing_args, \
                 self.env.dialoguemanager.statemachine.feat_len, retrieval_args.get('result_dir'))
 
         self.num_epochs      = training_args.get('num_epochs')
@@ -103,64 +104,68 @@ class Experiment(object):
         return env
 
     @staticmethod
-    def set_agent(retrieval_args, training_args, reinforce_args, feature_length, result_dir):
+    def set_agent(retrieval_args, training_args, reinforce_args, testing_args, feature_length, result_dir):
         print("Setting up Agent...")
 
         ######################################
         #    Predefined Network Parameters   #
         ######################################
+        if training_args:
+            # Network
+            input_height = 1              # change feature
+            input_width  = feature_length
+            num_actions  = 5
+            phi_length   = 1 # input 4 frames at once num_frames
+            discount     = 1.
+            rms_decay    = 0.99
+            rms_epsilon  = 0.1
+            momentum     = 0.
+            nesterov_momentum = 0.
+            network_type = 'rl_dnn'
+            batch_accumulator = 'sum'
+            rng = np.random.RandomState()
 
-        # Network
-        input_height = 1              # change feature
-        input_width  = feature_length
-        num_actions  = 5
-        phi_length   = 1 # input 4 frames at once num_frames
-        discount     = 1.
-        rms_decay    = 0.99
-        rms_epsilon  = 0.1
-        momentum     = 0.
-        nesterov_momentum = 0.
-        network_type = 'rl_dnn'
-        batch_accumulator = 'sum'
-        rng = np.random.RandomState()
-
-        network = q_network.DeepQLearner(
-                                        input_width       = feature_length,
-                                        input_height      = input_height,
-                                        net_width         = training_args.get('model_width'),
-                                        net_height        = training_args.get('model_height'),
-                                        num_actions       = num_actions,
-                                        num_frames        = phi_length,
-                                        discount          = discount,
-                                        learning_rate     = training_args.get('learning_rate'),
-                                        rho               = rms_decay,
-                                        rms_epsilon       = rms_epsilon,
-                                        momentum          = momentum,
-                                        nesterov_momentum = nesterov_momentum,
-                                        clip_delta        = training_args.get('clip_delta'),
-                                        freeze_interval   = reinforce_args.get('freeze_interval'),
-                                        batch_size        = training_args.get('batch_size'),
-                                        network_type      = network_type,
-                                        update_rule       = training_args.get('update_rule'),
-                                        batch_accumulator = batch_accumulator,
-                                        rng               = rng,
-                                        double            = training_args.get('agent_double'),
-                                        dueling           = training_args.get('agent_dueling')
-                                        )
+            network = q_network.DeepQLearner(
+                input_width       = feature_length,
+                input_height      = input_height,
+                net_width         = training_args.get('model_width'),
+                net_height        = training_args.get('model_height'),
+                num_actions       = num_actions,
+                num_frames        = phi_length,
+                discount          = discount,
+                learning_rate     = training_args.get('learning_rate'),
+                rho               = rms_decay,
+                rms_epsilon       = rms_epsilon,
+                momentum          = momentum,
+                nesterov_momentum = nesterov_momentum,
+                clip_delta        = training_args.get('clip_delta'),
+                freeze_interval   = reinforce_args.get('freeze_interval'),
+                batch_size        = training_args.get('batch_size'),
+                network_type      = network_type,
+                update_rule       = training_args.get('update_rule'),
+                batch_accumulator = batch_accumulator,
+                rng               = rng,
+                double            = training_args.get('agent_double'),
+                dueling           = training_args.get('agent_dueling')
+            )
+        else:
+            rng = np.random.RandomState()
+            with open(testing_args.get('model_dir'), 'r') as f:
+                network = cPickle.load(f)
         # Agent
         experiment_prefix = os.path.join(result_dir,retrieval_args.get("exp_name"),'model')
 
         agt = agent.NeuralAgent(
-                                q_network           = network,
-                                epsilon_start       = reinforce_args.get('epsilon_start'),
-                                epsilon_min         = reinforce_args.get('epsilon_min'),
-                                epsilon_decay       = reinforce_args.get('epsilon_decay'),
-                                replay_memory_size  = reinforce_args.get('replay_memory_size'),
-                                exp_pref            = experiment_prefix,
-                                replay_start_size   = reinforce_args.get('replay_start_size'),
-                                update_frequency    = reinforce_args.get('update_frequency'),
-                                rng                 = rng
-                                )
+            q_network           = network,
+            epsilon_start       = reinforce_args.get('epsilon_start'),
+            epsilon_min         = reinforce_args.get('epsilon_min'),
+            epsilon_decay       = reinforce_args.get('epsilon_decay'),
+            replay_memory_size  = reinforce_args.get('replay_memory_size'),
+            exp_pref            = experiment_prefix,
+            replay_start_size   = reinforce_args.get('replay_start_size'),
+            update_frequency    = reinforce_args.get('update_frequency'),
+            rng                 = rng
+        )
 
         return agt
 
@@ -205,7 +210,14 @@ class Experiment(object):
             self.run_epoch(test_flag = True)
             self.agent.finish_testing(epoch)
 
-    def run_epoch(self,test_flag=False):
+    def run_test(self):
+        # Start Running
+        Experiment.print_red('Init Model')
+        self.agent.start_testing()
+        self.run_epoch(test_flag=True)
+        self.agent.finish_testing(0)
+
+    def run_epoch(self, test_flag=False):
         epoch_data = self.training_data
         if test_flag:
             epoch_data = self.testing_data

@@ -178,7 +178,7 @@ class NeuralAgent(object):
         #TESTING---------------------------
         if self.testing:
             self.episode_reward += reward
-            #action = self._choose_action(self.test_data_set, .05,
+            # action = self._choose_action(self.test_data_set, .05,
             action = self._choose_action(self.test_data_set, 0.,
                                          observation, np.clip(reward, -1, 1))
 
@@ -303,9 +303,6 @@ class NeuralAgent(object):
             for i in range(holdout_size):
                 holdout_sum += np.max(
                     self.network.q_vals(self.holdout_data[i, ...]))
-
-        #self._update_results_file(epoch, self.episode_counter,
-        #                          holdout_sum / holdout_size)
 
 
 if __name__ == "__main__":
