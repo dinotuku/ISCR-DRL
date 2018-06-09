@@ -35,4 +35,4 @@ else
   exit
 fi
 
-THEANO_FLAGS=device=gpu0,floatX=float32 python run_training.py -f $fold --feature $feature_type --directory /home/tung/ISCR-DRL/data/$data --result /home/tung/ISCR-DRL/result_survey --name $name $type_args --model_dir /home/tung/ISCR-DRL/data/model/$model.pkl
+THEANO_FLAGS=device=gpu0,floatX=float32 python run_testing.py -f $fold --feature $feature_type --directory /home/tung/ISCR-DRL/data/$data --result /home/tung/ISCR-DRL/result_survey --name $name $type_args --model_dir /home/tung/ISCR-DRL/data/model/$model.pkl
