@@ -150,7 +150,7 @@ class Experiment(object):
             )
         else:
             rng = np.random.RandomState()
-            Experiment.print_red('Loading model', testing_args.get('model_dir'))
+            Experiment.print_red("Loading model {}".format(testing_args.get('model_dir')))
             with open(testing_args.get('model_dir'), 'r') as f:
                 network = cPickle.load(f)
         # Agent
