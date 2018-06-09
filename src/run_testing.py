@@ -74,4 +74,4 @@ if __name__ == "__main__":
     #        Run Experiment       #
     ###############################
     exp = Experiment(retrieval_args, {}, reinforce_args, testing_args)
-    exp.run()
+    exp.run_test()
